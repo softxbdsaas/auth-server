@@ -7,8 +7,10 @@ const {
   generateRandomPassword,
 } = require("../helper/idnex");
 const { EmailSend } = require("../helper/sendEmail");
+const { default: axios } = require("axios");
+const NumberVerify = require("../models/NumberVerify");
 const router = express.Router();
-
+const OTP_SENDER_URL = `http://sms.maya-bd.com:7788/sendtext?apikey=7a82860ccf0ec40b&secretkey=7fa00af7&callerID=12345`;
 // JWT Secret
 const JWT_SECRET = "mysecrettoken";
 
@@ -84,6 +86,14 @@ router.post("/register", async (req, res) => {
     if (email) {
       await EmailSend(sendEmail, subject, text, html);
     }
+
+    if (phoneNumber) {
+      await axios.post(
+        `${OTP_SENDER_URL}&toUser=${phoneNumber}&messageContent=mybet27  UserName:${userName} and password:${
+          password ? password : userPassword
+        }`
+      );
+    }
     // Save the user in the database
     await user.save();
 
@@ -130,6 +140,65 @@ router.post("/login", async (req, res) => {
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server error");
+  }
+});
+
+router.post("/verify-phone", async (req, res) => {
+  try {
+    const { phoneNumber } = req.body;
+
+    // Check if code and phoneNumber are provided
+    if (!phoneNumber) {
+      return res.status(400).json({ msg: "Please provide  phone number" });
+    }
+    // TODO: Implement code verification logic here
+    const otp = parseInt(
+      Math.floor(100000 + Math.random() * 900000).toString()
+    );
+    // Send OTP to the phone number
+    const { data } = await axios.post(
+      `${OTP_SENDER_URL}&toUser=${phoneNumber}&messageContent=mybet27 phone number verify Otp:${otp}`
+    );
+    const result = await NumberVerify.create({ phoneNumber, otp });
+    if (result && data) {
+      return res.json({
+        status: true,
+        message: "Verification code sent successfully",
+      });
+    } else {
+      return res.status(500).json({
+        status: false,
+        message: "Failed to send verification code",
+      });
+    }
+    // TODO: Send the verification code to the user's phone number
+  } catch {
+    console.error(err.message);
+    res.status(500).send("Server error");
+  }
+});
+
+router.post("/verify-otp", async (req, res) => {
+  try {
+    const { phoneNumber, otp } = req.body;
+    if (!phoneNumber) {
+      return res.status(400).json({ msg: "Please provide phone number" });
+    }
+    if (!otp) {
+      return res.status(400).json({ msg: "Please provide otp number" });
+    }
+    const verifyInfo = await NumberVerify.findOne({ phoneNumber: phoneNumber });
+    if (!verifyInfo || verifyInfo.otp !== otp) {
+      return res.json({ error: "Invalid OTP or OTP expired" });
+    }
+    await NumberVerify.findByIdAndDelete(verifyInfo._id);
+    return res.json({
+      status: true,
+      message: "OTP verified successfully",
+      verifyInfo,
+    });
+  } catch (error) {
+    res.status(500).send({ state: false, message: error.message });
   }
 });
 
