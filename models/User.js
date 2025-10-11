@@ -1,32 +1,52 @@
 const mongoose = require("mongoose");
-const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
+const UserSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+    },
+    userName: {
+      type: String,
+      required: true,
+    },
+    phoneNumber: {
+      type: String,
+    },
+    country: {
+      type: String,
+    },
+    currency: {
+      type: String,
+    },
+    email: {
+      type: String,
+    },
+    password: {
+      type: String,
+      required: true,
+    },
+    profileURL: {
+      type: String,
+    },
+    address: {
+      type: String,
+    },
+    identityNumber: {
+      type: String,
+    },
+    NIDBackendImage: {
+      type: String,
+    },
+    NIDFrontendImage: {
+      type: String,
+    },
+    dateOfBirth: {
+      type: Date,
+    },
   },
-  userName: {
-    type: String,
-    required: true,
-  },
-  phoneNumber: {
-    type: String,
-    unique: true, // Ensure phone number is unique
-    sparse: true, // Allow multiple null values
-  },
-  country: {
-    type: String,
-  },
-  currency: {
-    type: String,
-  },
-  email: {
-    type: String,
-    unique: true, // Ensure email is unique
-  },
-  password: {
-    type: String,
-    required: true,
-  },
-});
+  {
+    timestamps: true, // Add createdAt and updatedAt fields automatically
+  }
+);
 
 const User = mongoose.model("User", UserSchema);
 module.exports = User;

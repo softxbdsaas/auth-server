@@ -8,14 +8,21 @@ const app = express();
 const PORT = process.env.VITE_PORT || 5000;
 
 // Middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: "*", // Allow all origins
+    methods: "GET, POST, PUT, DELETE", // Allow specified HTTP methods
+    allowedHeaders: "*", // Allow all headers
+  })
+);
+
 app.use(express.json());
 app.use(bodyParser.json());
 // Connect to MongoDB
 connectDB();
 // Start the server
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);  // Fixed string interpolation with backticks
+  console.log(`Server running on port ${PORT}`); // Fixed string interpolation with backticks
 });
 
 // Routes

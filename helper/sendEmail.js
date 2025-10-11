@@ -7,8 +7,7 @@ const EmailSend = async (sendEmail, subject, text, html) => {
       secure: true,
       port: 465,
       auth: {
-        user: "shamimusman515419@gmail.com",
-        pass: "uplcbldjmbfcrelk", // Make sure this is kept secure, don't hardcode sensitive data
+   
       },
     });
 
